@@ -1,6 +1,6 @@
 # LibP2P Playground
 ## Overview
-An minimal environment for developing with the LibP2P library in Javascript. To create a new app, produce a new folder under [apps](/apps). For an exhaustive collection of documentation, references, and example apps with LibP2P, see the official [js-libp2p](https://github.com/libp2p/js-libp2p) Github repository.
+An environment for developing with the LibP2P library in Javascript. To create a new app, produce a new folder under [apps](/apps). For an exhaustive collection of documentation, references, and example apps with LibP2P, see the official [js-libp2p](https://github.com/libp2p/js-libp2p) Github repository.
 
 ## Setting Up
 1. Clone this repository

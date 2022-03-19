@@ -93,6 +93,19 @@ let peerCount = 0
     }
   })
 
+  // Pass ball to a player
+  await node.handle('/pass/1.0.0', async ({ connection, stream }) => {
+    let passName = await streamToConsole(stream)
+    let peerId = connection.remotePeer.toB58String()
+
+    if(passName == "random"){
+      let player = Math.floor(Math.random() * peerMa.length)
+      const { stream } = await node.dialProtocol(peerMa[player], '/receive/1.0.0')
+      let message = "You got the ball"
+      stdinToStream(stream,message)
+    }
+  })
+
   // Start listen
   await node.start()
   console.log('Listening on ')

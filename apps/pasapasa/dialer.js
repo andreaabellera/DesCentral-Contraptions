@@ -9,6 +9,7 @@ const { stdinToStream, streamToConsole } = require('./stream')
 
 let currName = ""
 let starting = false
+let gameStart = false
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Setup Node
@@ -58,7 +59,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let tokens = startEcho.split('\n')
 
     if(tokens.length == 2){ //The game is starting
-      document.getElementById("ball").innerHTML = "<b>You have the ball</b>"
+      gameStart = true
+      document.getElementById("pass").innerHTML = "<button>Pass</button>"
+      //pass("random")
     }
   })
 
@@ -109,5 +112,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     starting = !starting
     const { stream } = await libp2p.dialProtocol(listenerMa, '/start/1.0.0')
     stdinToStream(stream, currName + " " + starting.toString())
+  }
+
+  // Pass
+  async function pass(passName) {
+    const { stream } = await libp2p.dialProtocol(listenerMa, '/pass/1.0.0')
+    stdinToStream(stream, passName)
   }
 })

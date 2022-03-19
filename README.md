@@ -16,11 +16,11 @@ An minimal environment for developing with the LibP2P library in Javascript. To 
 ## Pasapasa
 Pasapasa is a WONDERFUL DESCRIPTION. This sample demo app is developed by [andreaabellera](https://github.com/andreaabellera).  
 
-#### Additional Setup
+**Additional Setup**
 1. In the Pasapasa directory, run this to install a dependency.  
 ```npm install libp2p-webrtc-direct```
 
-#### Launching the App
+**Launching the App**
 1. Open two terminals on the Pasapasa directory.
 2. On the first terminal, enter this to start the Listener. The Listener will display connected peers and their activities in real-time.  
 ```node listener.js```

@@ -108,7 +108,7 @@
     "libp2p-utils": "^0.4.0",
     "mafmt": "^10.0.0",
     "merge-options": "^3.0.4",
-    "mortice": "^2.0.1",
+    "mortice": "^3.0.0",
     "multiaddr": "^10.0.0",
     "multiformats": "^9.0.0",
     "multistream-select": "^3.0.0",

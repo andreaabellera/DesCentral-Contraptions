@@ -1,0 +1,30 @@
+{
+  "name": "libp2p-examples",
+  "version": "1.0.0",
+  "description": "Examples of how to use libp2p",
+  "scripts": {
+    "test": "node ./test.js",
+    "test:all": "node ./test-all.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@achingbrain/libp2p-gossipsub": "^0.12.2",
+    "@chainsafe/libp2p-noise": "^5.0.2",
+    "execa": "^2.1.0",
+    "fs-extra": "^8.1.0",
+    "it-concat": "^2.0.0",
+    "it-pipe": "^1.1.0",
+    "libp2p": "file:../src",
+    "libp2p-mplex": "^0.10.7",
+    "libp2p-pubsub-peer-discovery": "^4.0.0",
+    "libp2p-relay-server": "^0.3.0",
+    "libp2p-tcp": "^0.17.2",
+    "p-defer": "^3.0.0",
+    "uint8arrays": "^3.0.0",
+    "which": "^2.0.1"
+  },
+  "devDependencies": {
+    "https": "^1.0.0",
+    "playwright": "^1.7.1"
+  }
+}

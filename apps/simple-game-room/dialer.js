@@ -1,6 +1,6 @@
 /*
  * Simple Game Room
- *   An sample implementation of a peer-to-peer game room
+ *   A sample implementation of a peer-to-peer game room
  * 
  * dialer
  *   A dialer (acting client) for each browser player

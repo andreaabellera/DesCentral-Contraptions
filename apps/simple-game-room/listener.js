@@ -1,6 +1,6 @@
 /*
  * Simple Game Room
- *   An sample implementation of a peer-to-peer game room
+ *   A sample implementation of a peer-to-peer game room
  * 
  * listener.js
  *   A listener (acting server) for the game room

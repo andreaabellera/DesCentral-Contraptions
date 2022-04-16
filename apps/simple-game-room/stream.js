@@ -1,3 +1,11 @@
+/*
+ * Simple Game Room
+ *   A sample implementation of a peer-to-peer game room
+ * 
+ * stream.js
+ *   Used for streaming or sending messages between nodes
+ */
+
 'use strict'
 /* eslint-disable no-console */
 
@@ -22,15 +30,6 @@ async function streamToConsole(stream) {
   for await (const c of src){
     name += c.toString()[1]
   }
-  /*pipe(
-    stream.source,
-    lp.decode(),
-    async function (src) {
-      for await (const msg of src)
-        name += msg.toString()
-      console.log("User " + name + " has joined")
-    }
-  )*/
   return name
 }
 

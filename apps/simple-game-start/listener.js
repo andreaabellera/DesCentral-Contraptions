@@ -1,3 +1,19 @@
+/*
+ * Simple Game Room
+ *   An sample implementation of a peer-to-peer game room
+ * 
+ * listener.js
+ *   A listener (acting server) for the game room
+ * 
+ * PROTOCOL LIST
+ * 
+ * If using a code editor, search up these I-codes (e.g. I2) to be directed to your desired section 
+ * [PR1] Detection
+ * [PR2] Naming
+ * [PR3] Listing
+ * [PR4] Starting
+ */
+
 const Libp2p = require('libp2p')
 const Bootstrap = require('libp2p-bootstrap')
 const WebRTCDirect = require('libp2p-webrtc-direct')
@@ -13,7 +29,7 @@ let peerMa = []
 let peerCount = 0
 
 ;(async () => {
-  // Setup Node
+  // Setup listener node
   const hardcodedPeerId = await PeerId.createFromJSON({
     "id": "12D3KooWCuo3MdXfMgaqpLC5Houi1TRoFqgK9aoxok4NK5udMu8m",
     "privKey": "CAESQAG6Ld7ev6nnD0FKPs033/j0eQpjWilhxnzJ2CCTqT0+LfcWoI2Vr+zdc1vwk7XAVdyoCa2nwUR3RJebPWsF1/I=",
@@ -38,11 +54,21 @@ let peerCount = 0
     }
   })
 
+  // Start listen
+  await node.start()
+  console.log('Listening on ')
+  node.multiaddrs.forEach((ma) => console.log(`${ma.toString()}/p2p/${node.peerId.toB58String()}`))
+
+
+  /*=================
+    [PR1]  DETECTION
+    ==================*/
+
   // Detect new peer
   node.connectionManager.on('peer:connect', (connection) => {
     peerCount++
     let peerId = connection.remotePeer.toB58String()
-    peers[peerId] = peerCount.toString()
+    peers[peerId] = "New Player " + peerCount.toString()
     peerStatus[peerId] = false
     console.info(`Connected to ${peerId}!`)
     showPeers()
@@ -52,32 +78,54 @@ let peerCount = 0
     peerMa.push(ma)
   })
 
-  // Update nickname
-  await node.handle('/chat/1.0.0', async ({ connection, stream }) => {
+
+  /*=================
+    [PR2]  NAMING
+    ==================*/
+
+  // Update a dialer's nickname
+  await node.handle('/update/1.0.0', async ({ connection, stream }) => {
     let name = await streamToConsole(stream)
     let peerId = connection.remotePeer.toB58String()
     console.log(peerId + " has changed nickname to " + name)
+    let oldName = peers[peerId]
     peers[peerId] = name
-    
     showPeers()
-
-    // Update all dialers with new nickname
+    
+    // Notify all dialers with new peer nickname
     if(name){
       for(let ma of peerMa){
-        const { stream } = await node.dialProtocol(ma, '/update/1.0.0')
-        stdinToStream(stream,name)
+        const { stream } = await node.dialProtocol(ma, '/updateEcho/1.0.0')
+        stdinToStream(stream,name + ";" + oldName) // For parsing: new name;old name
       }
     }
+
+
+  /*=================
+    [PR3]  LISTING
+    ==================*/
+
+    // Give players the list of current players in the game room
+    for(let ma of peerMa){
+      let { stream } = await node.dialProtocol(ma, '/getCurrPlayers/1.0.0')
+      let peerList = Object.values(peers).join(";") // For parsing: p1;p2;p3;...;pn
+      stdinToStream(stream,peerList)
+    }
   })
+
+
+  /*=================
+    [PR4]  STARTING
+    ==================*/
 
   // Receive start signal
   await node.handle('/start/1.0.0', async ({ connection, stream }) => {
     let signal = await streamToConsole(stream)
     let peerId = connection.remotePeer.toB58String()
-    let tokens = signal.split(" ")
+    let tokens = signal.split(";")
     let name = tokens[0]
     let ready = tokens[1] == "true"
-    let startEcho = "Player " + name
+    let startEcho = name
     if(ready)
       startEcho += " is ready"
     else
@@ -86,36 +134,25 @@ let peerCount = 0
     peerStatus[peerId] = ready
     startEcho += checkStart()
 
-    // Update all dialers with start signal
+    // Notify all dialers with peer's start signal
     for(let ma of peerMa){
       const { stream } = await node.dialProtocol(ma, '/startEcho/1.0.0')
       stdinToStream(stream,startEcho)
     }
   })
 
-  // Pass ball to a player
-  await node.handle('/pass/1.0.0', async ({ connection, stream }) => {
-    let passName = await streamToConsole(stream)
-    let peerId = connection.remotePeer.toB58String()
-
-    if(passName == "random"){
-      let player = Math.floor(Math.random() * peerMa.length)
-      const { stream } = await node.dialProtocol(peerMa[player], '/receive/1.0.0')
-      let message = "You got the ball"
-      stdinToStream(stream,message)
-    }
-  })
-
-  // Start listen
-  await node.start()
-  console.log('Listening on ')
-  node.multiaddrs.forEach((ma) => console.log(`${ma.toString()}/p2p/${node.peerId.toB58String()}`))
-
 })()
 
+
+
+/*=================
+  CHECK PEER RECORD
+  ==================*/
+
+
 function showPeers(){
-  //console.log(Object.keys(peers))
-  console.log("Peers in the House: " + Object.values(peers).join(", "))
+  //console.log(Object.keys(peers)) // Uncomment to see all hashed peer IDs
+  console.log("Players in the Room: " + Object.values(peers).join(", "))
 }
 
 function checkStart(){

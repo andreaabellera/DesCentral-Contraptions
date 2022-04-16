@@ -4,8 +4,9 @@
     <meta charset="utf-8">
     <title> Pasapasa | The awesome way to pass files </title>
     <script src="app.js"> </script>
-    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"> 
-    <!-- <link rel="icon" href="logo.png"> -->
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" href="logo.png">
   </head>
 
   <body id="body">
@@ -15,25 +16,55 @@
             <div id="logo"></div>
             <div id="app-name"> Pasapasa </div>
         </div>
-        <div id="h-right"> The awesome way to share files </div>
+        <div id="h-right"> The awesome way to pass files </div>
     </div>
 
-    <div class="view">
-        <div class="content">
-            
+    <div id="view">
+        
+        <div id="start">
+            <input id="namer" placeholder="Enter your name">
+            <button id="go" class="material-icons"> done </button>
+        </div>
+        <div id="arrowee" class="material-icons"> north </div>
+
+        <div id="content">
             <div class="container">
                 <div class="box">
-                    <div class="upload-text"> Upload </div>
-                    <div class="upload-cntr">
-                        <div id="uploader" type="file"></div>
-                        <div id="upload-icon"></div>
-                    </div>
+                    <div id="upload-h" class="heading"> Upload </div>
+                    <input id="uploader" type="file">
                 </div>
             </div>
 
             <div class="container">
                 <div class="box">
-                    <div class="files-text"> Files </div>
+                    <div id="files-h" class="heading"> Shared Files </div>
+                    <div id="file-array">
+                        <button class="card">
+                            <div class="filename"> bouttle_ouf_watah.png </div>
+                            <div class="preview"></div>
+                            <div class="material-icons"> system_update_alt </div>
+                        </button>
+                        <button class="card">
+                            <div class="filename"> Iwant2bePILOT.txt </div>
+                            <div class="material-icons"> system_update_alt </div>
+                        </button>
+                        <button class="card">
+                            <div class="filename"> huh14.psd </div>
+                            <div class="material-icons"> system_update_alt </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                <div id="buddies-box" class="box">
+                    <div id="buddies-h" class="heading"> (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ <i> buddies </i> </div>
+                    <ul id="buddy-array">
+                        <li>Callista</li>
+                        <li>Param</li>
+                        <li>Red Colt</li>
+                        <li>Discord's Wumpus</li>
+                    </p>
                 </div>
             </div>
 
@@ -44,92 +75,29 @@
   </body>
 </html>
 
-<style>
-    :root{  
-        --seagreen: #3F6D74;
-        --bright-teal: #6AC9D1;
-        --teal: #5BB4BE;
-        --med-teal: #4F9EA8;
-        --dark-teal: #2E717B;
-        --darker-teal: #052032;
-        --darkest-teal: #051C2E;
-    }
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let go = document.getElementById("go");
+        let start = document.getElementById("start");
+        let content = document.getElementById("content");
 
-html,body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    width: 100vw;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    font-family: 'Mukta', sans-serif;
-    overflow-x: hidden;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    background-color: rgb(162, 232, 232);
-}
+        go.addEventListener("click", function() {
+            let view = document.getElementById("view");
+            view.removeChild(document.getElementById("arrowee"));
 
-body::-webkit-scrollbar-track {
-    background-color: rgba(0, 0, 0, 0);
-}
-
-body::-webkit-scrollbar {
-    width: 0px;
-    background-color: rgba(0, 0, 0, 0);
-}
-
-body::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0);
-}
-
-.header {
-    display: fixed;
-    height: 12vh;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: xx-large;
-    background-color: var(--bright-teal);
-    z-index: 3;
-    box-shadow: 0 1em 1.5em -1.05em rgba(46, 84, 165, 0.4);
-}
-
-#logo {
-    /* background-image: url(logo.png); */
-    height: 1.25em;
-    width: 1.25em;
-    margin-right: 2vw;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-#h-left {
-    margin-left: 4vw;
-    color: var(--darker-teal);
-    display: flex;
-    align-items: center;
-}
-
-#h-right {
-    margin-right: 6vw;
-    color: var(--dark-teal);
-    font-size: 0.65em;
-    display: block;
-}
-
-.view{
-    display: grid;
-    width: inherit;
-    justify-items: center;
-}
-
-.content{
-    margin-top: 5vh;
-    width: 90%;
-    background-color: #4F9EA8;
-}
-</style>
+            var id = setInterval(frame, 20);
+            var pos = 13;
+            function frame() {
+                if (pos < -6) {
+                    clearInterval(id);
+                    view.removeChild(start);
+                } else {
+                    pos-=2;
+                    start.style.marginTop = pos + "vh";
+                    start.style.opacity = pos * 0.1;
+                    content.style.opacity = pos * -0.1;
+                }
+            }
+        });
+    });
+</script>

@@ -10,10 +10,11 @@ An environment for developing with the LibP2P library in Javascript. The playgro
 ***LibP2P should now be enabled for all current and upcoming apps***
 
 ## Creating your own App
-Produce a new directory in [apps](/apps) and give it the name of your shiny new project.  Update the apps README to include the name and description of your app. Including a README inside your app directory to guide developers in setting up and launching your app is strongly encouraged
+1. Produce a new directory in [apps](/apps). Give it the name of your shiny new project
+2. Update the apps README to include the name and description of your app
+3. Including a README inside your app directory to guide developers in setting up and launching your app is strongly encouraged
 
 ## License
 [MIT](LICENSE) © Protocol Labs  
 
-## Resources
 For an exhaustive collection of documentation, references, and example apps with LibP2P, see the official [js-libp2p](https://github.com/libp2p/js-libp2p) Github repository

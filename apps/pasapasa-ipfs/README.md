@@ -3,5 +3,5 @@ A file sharing interface developed with [IPFS](https://ipfs.io/). All file uploa
 ![Pasapasa preview](/pasapasa_preview.png)  
 Contributors: [andreaabellera](https://github.com/andreaabellera)  
 
-**Launching the App**
+### Launching the App
 Coming soon

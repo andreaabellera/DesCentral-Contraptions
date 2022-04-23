@@ -8,10 +8,14 @@
 
 'use strict'
 
-import { create } from 'ipfs-core'
+import { create } from 'ipfs-http-client'
 
 const App = () => {
+  let hardcodedPeerId = "bafybeihcyruaeza7uyjd6ugicbcrqumejf6uf353e5etdkhotqffwtguva"
   let username = "Guest"
+  //let address = "/ip4/127.0.0.1/tcp/5001" // multiaddr (alternative)
+  let address = "http://127.0.0.1:5001"
+  let ipfs
 
   // Declare username
   document.getElementById("go").addEventListener("click", function() {
@@ -39,33 +43,6 @@ const App = () => {
         }
     }
   })
-  
-
-  let ipfs
-
-  // Upload file to IPFS
-  const store = async (name, content) => {
-    if (!ipfs) {
-      // Create IPFS node
-      ipfs = await create({
-        repo: String(Math.random() + Date.now()),
-        init: { alogorithm: 'ed25519' }
-      })
-    }
-
-    const id = await ipfs.id()
-    console.log("Connected to IPFS node: " + id.id)
-    const fileToAdd = {
-      path: `${name}`,
-      content: content
-    }
-    console.log("Adding file: " + fileToAdd.path)
-    const file = await ipfs.add(fileToAdd)
-    console.log("File added to " + file.cid)
-    console.log("Preview: https://ipfs.io/ipfs/" + file.cid)
-
-    return file.cid
-  }
 
 
   // Add a new file to the interface
@@ -89,6 +66,28 @@ const App = () => {
       }
     }
   }
+
+
+  // Upload file to IPFS
+  const store = async (name, content) => {
+    if (!ipfs) {
+      ipfs = create(address)
+    }
+
+    const id = await ipfs.id()
+    console.log("Connected to IPFS node: " + id.id)
+    const fileToAdd = {
+      path: `${name}`,
+      content: content
+    }
+    console.log("Adding file: " + fileToAdd.path)
+    const file = await ipfs.add(fileToAdd) // Add file to global IPFS
+    await ipfs.files.write(`/${name}`, content, {create: true}) // Add file to local node (see localhost:5001/webui/#/files)
+    console.log("File added to " + file.cid)
+    console.log(`Preview: https://ipfs.io/ipfs/${file.cid}`)
+
+    return file.cid
+  }
     
     
   // Add new file entry to interface
@@ -107,8 +106,9 @@ const App = () => {
       previewDiv.classList.add("preview")
       let imageFormats = ["png", "jpg", "jpeg", "gif", "bmp"]
       let extension = fileName.split('.').pop()
-      if(imageFormats.includes(extension))
+      if(imageFormats.includes(extension)){
         previewDiv.style.backgroundImage = "url(https://ipfs.io/ipfs/" + fileId + ")"
+      }
       card.appendChild(previewDiv)
       
       let downloadIcon = document.createElement("div")
@@ -139,6 +139,12 @@ const App = () => {
       card.innerHTML = `<div class="filename"> Failed to upload file '${fileName}' </div>`
     console.log("File id is " + fileId)
     fileArray.appendChild(card)
+
+    ;(async () => {
+      console.log("ls test")
+      const ls = await ipfs.files.ls('/')
+      console.log(ls)
+    })()
   }
 
 }

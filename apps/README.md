@@ -3,4 +3,7 @@
 A simple implementation of a peer-to-peer game room
 
 ### Pasapasa IPFS
-A file sharing interface developed with [IPFS](https://ipfs.io/)
+A full environment for file sharing interface developed with [IPFS](https://ipfs.io/). This app is ideal for users taking a more intensive route to learning IPFS. To play with a limited version of the app without much overhead environment setups, see [Pasapasa Lite](/apps/pasapasa-lite)
+
+### Pasapasa Lite
+A single-user lite version of the Pasapasa IPFS file sharing interface

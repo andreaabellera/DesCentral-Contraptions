@@ -1,5 +1,5 @@
 # Pasapasa IPFS
-A full environment for file sharing interface developed with [IPFS](https://ipfs.io/). This app is ideal for users taking a more intensive route to learning IPFS. To play with a limited version of the app without much overhead environment setups, see [Pasapasa Lite](/apps/pasapasa-lite)  
+A full environment for file sharing interface developed with [IPFS](https://ipfs.io/). This app is ideal for users taking a more intensive route to learning IPFS. For a limited version with minimal overhead environment setup, see [Pasapasa Lite](/apps/pasapasa-lite)  
 Contributors: [andreaabellera](https://github.com/andreaabellera)
 
 ### Preview
@@ -16,7 +16,7 @@ Contributors: [andreaabellera](https://github.com/andreaabellera)
 
 ## Troubleshooting
 ### CORS
-If your app cannot connect due to CORS issues, edit the `config` file located in your `.ipfs` folder and locate the API section as outlined below.
+If your app can't connect to the API due CORS issues, edit the `config` file located in your `.ipfs` folder and locate the API section as outlined below.
 ```
 "API": {
     "HTTPHeaders": {}

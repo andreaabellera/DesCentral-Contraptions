@@ -18,14 +18,14 @@ An environment for developing with the LibP2P library in Javascript. The playgro
 [MIT](LICENSE) © Protocol Labs  
 
 ## Resources
-- **[LibP2P Github](https://github.com/libp2p)**  
+- **[LibP2P](https://github.com/libp2p)**  
 An exhaustive collection of documentation, references, and example apps with LibP2P
 
-- **[IPFS Github](https://github.com/ipfs)**  
+- **[IPFS](https://github.com/ipfs)**  
 An exhaustive collection of documentation, references, and resources made with IPFS
 
-- **[IPFS Examples Github](https://github.com/ipfs-examples)**  
+- **[IPFS Examples](https://github.com/ipfs-examples)**  
 Example apps made with IPFS
 
 - **[ProtoSchool](https://proto.school/)**  
-Much projects were made possible thanks to the tutorials in ProtoSchool, which taught foundational concepts in Decentralized File Systems
+Much projects were made possible thanks to the tutorials in ProtoSchool, which taught foundational concepts in decentralized file systems

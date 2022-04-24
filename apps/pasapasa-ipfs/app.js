@@ -1,5 +1,5 @@
 /*
- * Pasapasa
+ * Pasapasa IPFS
  *   A file sharing interface developed with IPFS
  * 
  * app.js
@@ -9,26 +9,53 @@
 'use strict'
 
 import { create } from 'ipfs-http-client'
+import Libp2p from 'libp2p'
+const { Multiaddr } = require('multiaddr')
+import Websockets from 'libp2p-websockets'
+import WebRTCStar from 'libp2p-webrtc-star'
+import { NOISE } from '@chainsafe/libp2p-noise'
+import Mplex from 'libp2p-mplex'
+import Bootstrap from 'libp2p-bootstrap'
 
 const App = () => {
-  let hardcodedPeerId = "bafybeihcyruaeza7uyjd6ugicbcrqumejf6uf353e5etdkhotqffwtguva"
   let username = "Guest"
-  //let address = "/ip4/127.0.0.1/tcp/5001" // multiaddr (alternative)
+  let peerNames = []
+  let peers = {}
+  let peerMa = []
+  let multiaddr = "/ip4/127.0.0.1/tcp/5001" // alternative to address
   let address = "http://127.0.0.1:5001"
-  let ipfs
+  let fileStore = {}
+  let ipfs = create(address)
+  let libp2p
+
+  // Setup WebUI link
+  document.getElementById("webui-linker").href = `${address}/webui/#/files`
 
   // Declare username
   document.getElementById("go").addEventListener("click", function() {
     let name = document.getElementById("namer").value
     if(name != "")
       username = name
+    document.getElementById("app-name").innerText = username
+
+    /*
+    // Append name to buddy list
     let buddyArray = document.getElementById("buddy-array")
     buddyArray.innerHTML += "<li>" + username + "</li>"
+    
+    // Notify peers of new buddy
+    ;(async () => {
+      for (ma of peerMa){
+        const { stream } = await libp2p.dialProtocol(ma, '/pasapasaname/1.0.0')
+        stdinToStream(stream, username)
+      }
+    })()*/
+
+    // Interface change animation
     let start = document.getElementById("start");
     let content = document.getElementById("content");
     let view = document.getElementById("view");
     view.removeChild(document.getElementById("arrowee"));
-
     var id = setInterval(frame, 20);
     var pos = 13;
     function frame() {
@@ -44,7 +71,6 @@ const App = () => {
     }
   })
 
-
   // Add a new file to the interface
   document.getElementById("add-file").onclick = async (e) => {
     e.preventDefault()
@@ -59,10 +85,7 @@ const App = () => {
         let fileName = name.replace(/^.*[\\\/]/, '') // Remove fakepath
         
         // Upload to IPFS
-        let fileId = await store(fileName, file)
-
-        // Add file to shared interface
-        addCard(fileName, fileId)
+        await store(fileName, file)
       }
     }
   }
@@ -70,10 +93,6 @@ const App = () => {
 
   // Upload file to IPFS
   const store = async (name, content) => {
-    if (!ipfs) {
-      ipfs = create(address)
-    }
-
     const id = await ipfs.id()
     console.log("Connected to IPFS node: " + id.id)
     const fileToAdd = {
@@ -139,13 +158,72 @@ const App = () => {
       card.innerHTML = `<div class="filename"> Failed to upload file '${fileName}' </div>`
     console.log("File id is " + fileId)
     fileArray.appendChild(card)
-
-    ;(async () => {
-      console.log("ls test")
-      const ls = await ipfs.files.ls('/')
-      console.log(ls)
-    })()
   }
+
+  // Poll Mutable File System per second for existing and new files
+  setInterval(async function() {
+      const mfsFiles = []
+
+      for await (const file of ipfs.files.ls('/'))
+          mfsFiles.push(file)
+
+      for (const file of mfsFiles) {
+        if (!fileStore.hasOwnProperty(file.cid)) {
+          console.log("File found: " + file.name)
+          addCard(file.name, file.cid)
+          fileStore[file.cid] = file.name
+        }
+      }
+  }, 1000)
+
+  
+  // LibP2P Operations
+  ;(async () => {
+    // Create LibP2P node
+    libp2p = await Libp2p.create({
+      addresses: {
+        listen: [ // Cannot set it up locally with IPFS. Out of desperation, I'm using a public server
+          '/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star'
+        ],
+      },
+      modules: {
+        transport: [Websockets, WebRTCStar],
+        connEncryption: [NOISE],
+        streamMuxer: [Mplex],
+        peerDiscovery: [Bootstrap]
+      },
+      config: {
+        peerDiscovery: {
+          [Bootstrap.tag]: {
+            enabled: true,
+            list: [
+              '/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb',
+              '/dnsaddr/bootstrap.libp2p.io/p2p/QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt'
+            ]
+          }
+        }
+      }
+    })
+
+    //await libp2p.start()
+    console.log(`LibP2P id is ${libp2p.peerId.toB58String()}`)
+
+    libp2p.on('peer:discovery', (peer) => {
+      let peerId = peer.toB58String()
+      let ma = new Multiaddr(`/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star/p2p/${peerId}`)
+      peers[peerId] = ma
+    })
+    libp2p.connectionManager.on('peer:connect', (connection) => {})
+    libp2p.connectionManager.on('peer:disconnect', (connection) => {})
+
+    // Cannot make it work for now
+    await libp2p.handle('/pasapasaname/1.0.0', async ({ stream }) => {
+      let name = await streamToConsole(stream)
+      peerNames.push(name)
+      console.log("Yay")
+      console.log(`Peer ${name} connected`)
+    })
+  })()
 
 }
 

@@ -3,30 +3,20 @@
  *   A file sharing interface developed with IPFS
  * 
  * app.js
- *   All connection and event handler logic
+ *   Connect to a local IPFS node and add new files to the local node repository and the global IPFS core network.
+ *   Users can download files from IPFS core network, view ipfs links in the browser, or view current files in the mutable file system.
+ *   
  */
 
 'use strict'
 
 import { create } from 'ipfs-http-client'
-import Libp2p from 'libp2p'
-const { Multiaddr } = require('multiaddr')
-import Websockets from 'libp2p-websockets'
-import WebRTCStar from 'libp2p-webrtc-star'
-import { NOISE } from '@chainsafe/libp2p-noise'
-import Mplex from 'libp2p-mplex'
-import Bootstrap from 'libp2p-bootstrap'
 
 const App = () => {
   let username = "Guest"
-  let peerNames = []
-  let peers = {}
-  let peerMa = []
-  let multiaddr = "/ip4/127.0.0.1/tcp/5001" // alternative to address
   let address = "http://127.0.0.1:5001"
   let fileStore = {}
   let ipfs = create(address)
-  let libp2p
 
   // Setup WebUI link
   document.getElementById("webui-linker").href = `${address}/webui/#/files`
@@ -37,19 +27,6 @@ const App = () => {
     if(name != "")
       username = name
     document.getElementById("app-name").innerText = username
-
-    /*
-    // Append name to buddy list
-    let buddyArray = document.getElementById("buddy-array")
-    buddyArray.innerHTML += "<li>" + username + "</li>"
-    
-    // Notify peers of new buddy
-    ;(async () => {
-      for (ma of peerMa){
-        const { stream } = await libp2p.dialProtocol(ma, '/pasapasaname/1.0.0')
-        stdinToStream(stream, username)
-      }
-    })()*/
 
     // Interface change animation
     let start = document.getElementById("start");
@@ -70,6 +47,7 @@ const App = () => {
         }
     }
   })
+
 
   // Add a new file to the interface
   document.getElementById("add-file").onclick = async (e) => {
@@ -99,6 +77,8 @@ const App = () => {
       path: `${name}`,
       content: content
     }
+
+    // Add file to IPFS
     console.log("Adding file: " + fileToAdd.path)
     const file = await ipfs.add(fileToAdd) // Add file to global IPFS
     await ipfs.files.write(`/${name}`, content, {create: true}) // Add file to local node (see localhost:5001/webui/#/files)
@@ -112,10 +92,10 @@ const App = () => {
   // Add new file entry to interface
   function addCard(fileName, fileId) {  
     let fileArray = document.getElementById("file-array")
-    let card = document.createElement("button")
+    let card = document.createElement("div")
     card.classList.add("card")
     
-    if(fileId != "") { // Upload success
+    if(fileId != "") { // Upload success, create file card
       let nameDiv = document.createElement("div")
       nameDiv.classList.add("filename")
       nameDiv.innerText = fileName
@@ -123,19 +103,30 @@ const App = () => {
 
       let previewDiv = document.createElement("div")
       previewDiv.classList.add("preview")
-      let imageFormats = ["png", "jpg", "jpeg", "gif", "bmp"]
+      let imageFormats = ["png", "jpg", "jpeg", "gif", "bmp"] // Add a preview image to card if photo
       let extension = fileName.split('.').pop()
       if(imageFormats.includes(extension)){
         previewDiv.style.backgroundImage = "url(https://ipfs.io/ipfs/" + fileId + ")"
       }
       card.appendChild(previewDiv)
       
-      let downloadIcon = document.createElement("div")
-      downloadIcon.classList.add("material-icons")
-      downloadIcon.innerText = "system_update_alt"
-      card.appendChild(downloadIcon)
+      let viewBtn = document.createElement("button")
+      viewBtn.classList.add("material-icons")
+      viewBtn.innerText = "share"
+      card.appendChild(viewBtn)
 
-      card.addEventListener("click", function(e) {
+      // Visit global IPFS link
+      viewBtn.addEventListener("click", () => {
+        window.open("https://ipfs.io/ipfs/" + fileId, "_blank");
+      });
+
+      let downloadBtn = document.createElement("button")
+      downloadBtn.classList.add("material-icons")
+      downloadBtn.innerText = "system_update_alt"
+      card.appendChild(downloadBtn)
+
+      // Download from global ipfs link
+      downloadBtn.addEventListener("click", function(e) {
         console.log("Downloading " + fileName)
         axios({
             url: "https://ipfs.io/ipfs/" + fileId,
@@ -160,13 +151,16 @@ const App = () => {
     fileArray.appendChild(card)
   }
 
-  // Poll Mutable File System per second for existing and new files
+
+  // Poll local node's Mutable File System per 1 second for existing and new files
   setInterval(async function() {
       const mfsFiles = []
 
+      // Get file list
       for await (const file of ipfs.files.ls('/'))
           mfsFiles.push(file)
 
+      // Add any new detected file to interface
       for (const file of mfsFiles) {
         if (!fileStore.hasOwnProperty(file.cid)) {
           console.log("File found: " + file.name)
@@ -175,55 +169,6 @@ const App = () => {
         }
       }
   }, 1000)
-
-  
-  // LibP2P Operations
-  ;(async () => {
-    // Create LibP2P node
-    libp2p = await Libp2p.create({
-      addresses: {
-        listen: [ // Cannot set it up locally with IPFS. Out of desperation, I'm using a public server
-          '/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star'
-        ],
-      },
-      modules: {
-        transport: [Websockets, WebRTCStar],
-        connEncryption: [NOISE],
-        streamMuxer: [Mplex],
-        peerDiscovery: [Bootstrap]
-      },
-      config: {
-        peerDiscovery: {
-          [Bootstrap.tag]: {
-            enabled: true,
-            list: [
-              '/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb',
-              '/dnsaddr/bootstrap.libp2p.io/p2p/QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt'
-            ]
-          }
-        }
-      }
-    })
-
-    //await libp2p.start()
-    console.log(`LibP2P id is ${libp2p.peerId.toB58String()}`)
-
-    libp2p.on('peer:discovery', (peer) => {
-      let peerId = peer.toB58String()
-      let ma = new Multiaddr(`/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star/p2p/${peerId}`)
-      peers[peerId] = ma
-    })
-    libp2p.connectionManager.on('peer:connect', (connection) => {})
-    libp2p.connectionManager.on('peer:disconnect', (connection) => {})
-
-    // Cannot make it work for now
-    await libp2p.handle('/pasapasaname/1.0.0', async ({ stream }) => {
-      let name = await streamToConsole(stream)
-      peerNames.push(name)
-      console.log("Yay")
-      console.log(`Peer ${name} connected`)
-    })
-  })()
 
 }
 

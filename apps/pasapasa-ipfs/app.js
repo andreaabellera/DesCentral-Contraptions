@@ -9,21 +9,21 @@
 'use strict'
 
 import { create } from 'ipfs-http-client'
-import Libp2p from 'libp2p'
+const Libp2p = require('libp2p')
+const WebRTCDirect = require('libp2p-webrtc-direct')
 const { Multiaddr } = require('multiaddr')
-import Websockets from 'libp2p-websockets'
-import WebRTCStar from 'libp2p-webrtc-star'
-import { NOISE } from '@chainsafe/libp2p-noise'
-import Mplex from 'libp2p-mplex'
-import Bootstrap from 'libp2p-bootstrap'
+const Mplex = require('libp2p-mplex')
+const { NOISE } = require('@chainsafe/libp2p-noise')
+const Bootstrap = require('libp2p-bootstrap')
+const { stdinToStream, streamToConsole } = require('./stream')
 
 const App = () => {
   let username = "Guest"
-  let peerNames = []
+  /*let peerNames = []
   let peers = {}
-  let peerMa = []
-  let multiaddr = "/ip4/127.0.0.1/tcp/5001" // alternative to address
-  let address = "http://127.0.0.1:5001"
+  let peerMa = []*/
+  let lAddress // LibP2P listener address
+  let address = "http://127.0.0.1:5001" // IPFS address
   let fileStore = {}
   let ipfs = create(address)
   let libp2p
@@ -38,18 +38,16 @@ const App = () => {
       username = name
     document.getElementById("app-name").innerText = username
 
-    /*
+    
     // Append name to buddy list
     let buddyArray = document.getElementById("buddy-array")
     buddyArray.innerHTML += "<li>" + username + "</li>"
     
-    // Notify peers of new buddy
+    // Send buddy name to listener
     ;(async () => {
-      for (ma of peerMa){
-        const { stream } = await libp2p.dialProtocol(ma, '/pasapasaname/1.0.0')
-        stdinToStream(stream, username)
-      }
-    })()*/
+      const { stream } = await libp2p.dialProtocol(lAddress, '/join/1.0.0')
+      stdinToStream(stream, username)
+    })()
 
     // Interface change animation
     let start = document.getElementById("start");
@@ -179,7 +177,8 @@ const App = () => {
   
   // LibP2P Operations
   ;(async () => {
-    // Create LibP2P node
+    // Obsolete: Cannot make the public server no listener route work
+    /*
     libp2p = await Libp2p.create({
       addresses: {
         listen: [ // Cannot set it up locally with IPFS. Out of desperation, I'm using a public server
@@ -204,25 +203,61 @@ const App = () => {
         }
       }
     })
-
-    //await libp2p.start()
-    console.log(`LibP2P id is ${libp2p.peerId.toB58String()}`)
-
     libp2p.on('peer:discovery', (peer) => {
       let peerId = peer.toB58String()
       let ma = new Multiaddr(`/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star/p2p/${peerId}`)
       peers[peerId] = ma
     })
-    libp2p.connectionManager.on('peer:connect', (connection) => {})
-    libp2p.connectionManager.on('peer:disconnect', (connection) => {})
-
-    // Cannot make it work for now
     await libp2p.handle('/pasapasaname/1.0.0', async ({ stream }) => {
       let name = await streamToConsole(stream)
       peerNames.push(name)
       console.log("Yay")
       console.log(`Peer ${name} connected`)
     })
+    */
+
+    // Create LibP2P node
+    const hardcodedPeerId = '12D3KooWCuo3MdXfMgaqpLC5Houi1TRoFqgK9aoxok4NK5udMu8m'
+    libp2p = await Libp2p.create({
+      modules: {
+        transport: [WebRTCDirect],
+        streamMuxer: [Mplex],
+        connEncryption: [NOISE],
+        peerDiscovery: [Bootstrap]
+      },
+      config: {
+        peerDiscovery: {
+          [Bootstrap.tag]: {
+            enabled: true,
+            list: [`/ip4/127.0.0.1/tcp/12345/http/p2p-webrtc-direct/p2p/${hardcodedPeerId}`]
+          }
+        }
+      }
+    })
+
+    // Detect connection
+    libp2p.connectionManager.on('peer:connect', (connection) => {
+      console.log(`Connected to LibP2P listener: ${connection.remotePeer.toB58String()}`)
+    })
+
+    // Receive join updates
+    await libp2p.handle('/joinRelay/1.0.0', async ({ stream }) => {
+      let buddyName = await streamToConsole(stream)
+      let buddyArray = document.getElementById("buddy-array")
+      buddyArray.innerHTML += `<li class="joined"> ${buddyName} has joined the room </li>`
+    })
+
+    // Receive chat updates
+    await libp2p.handle('/chatRelay/1.0.0', async ({ stream }) => {
+      let message = await streamToConsole(stream)
+      let buddyArray = document.getElementById("buddy-array")
+      buddyArray.innerHTML += `<li>${message}</li>`
+    })
+  
+    await libp2p.start()
+    lAddress = new Multiaddr(`/ip4/127.0.0.1/tcp/12345/http/p2p-webrtc-direct/p2p/${hardcodedPeerId}`)
+    console.log(`LibP2P id is ${libp2p.peerId.toB58String()}`)
+
   })()
 
 }

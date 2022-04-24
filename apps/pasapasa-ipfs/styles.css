@@ -138,6 +138,10 @@ ul{
     font-weight: 300;
 }
 
+.joined{
+    color: cornflowerblue;
+}
+
 .box input, #start input, #buddy-namer{
     width: 100%;
     height: fit-content;

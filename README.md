@@ -1,6 +1,6 @@
-# LibP2P Playground
+# Descentral Contraptions
 ## Overview
-An environment for developing with the LibP2P library in Javascript. The playground has a collection of [apps](/apps) that are ripe for exploring. Get wild and start your journey in decentralized web dev here!
+Comprehensive applications built with the LibP2P and IPFS libraries in Javascript. The playground has a collection of [apps](/apps) that are ripe for exploring. Get wild and start your journey in decentralized web dev here!
 
 ## Setting Up
 1. Clone or fork this repository
@@ -17,7 +17,7 @@ An environment for developing with the LibP2P library in Javascript. The playgro
 ## License
 [MIT](LICENSE) © Protocol Labs  
 
-## Resources
+## Learning Resources
 - **[LibP2P](https://github.com/libp2p)**  
 An exhaustive collection of documentation, references, and example apps with LibP2P
 

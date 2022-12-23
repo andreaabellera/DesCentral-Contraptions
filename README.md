@@ -1,4 +1,5 @@
-# DesCentral Contraptions
+# DesCentral Contraptions  
+![Pasapasa preview](/apps/pasapasa-ipfs/_pasapasa-preview_.gif)  
 ## Overview
 Comprehensive applications built with the LibP2P and IPFS libraries in Javascript. The playground has a collection of [apps](/apps) that are ripe for exploring. Get wild and start your journey in decentralized web dev here!
 

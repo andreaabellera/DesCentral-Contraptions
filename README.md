@@ -1,4 +1,4 @@
-# Descentral Contraptions
+# DesCentral Contraptions
 ## Overview
 Comprehensive applications built with the LibP2P and IPFS libraries in Javascript. The playground has a collection of [apps](/apps) that are ripe for exploring. Get wild and start your journey in decentralized web dev here!
 
